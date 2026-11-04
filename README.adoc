@@ -1,0 +1,68 @@
+:toc:
+:toc-placement!:
+:toclevels: 4
+:imagesdir: URL TO RAW.GITHUBUSERCONTENT.COM IMAGES FOLDER
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= Data Mappings Visualizer
+
+A tool to create flowchart Mermaid diagrams from data mappings spreadsheets.
+
+toc::[]
+
+== Assumptions
+
+* You have installed <<mermaidcli>>
+* Your data mappings are in a Microsoft Excel worksheet located on your local machine (not in a synced OneDrive directory)
+* Your data mappings spreadsheet expresses the <<datamappingconcepts>> in consistent ways that can be expressed in Ruby code snippets to configure this tool
+* You have created the required <<config>> for the mappings you want to visualize
+
+== Set up
+
+
+
+[#dependencies]
+== Non-Ruby/non-bundleable dependencies
+
+[#mermaidcli]
+=== mermaid-cli
+
+This tool generates the Mermaid code/syntax used generate a flowchart diagram.
+You will need to install a Mermaid renderer on your machine in order to generate the diagram from the Mermaid code/syntax.
+
+Recommended:  https://github.com/coolamit/mermaid-cli[the Go-based mmd-cli].
+
+This is a replacement for the official mermaid.js/mermaid-cli, which is embedded deeply in the node/npm ecosystem, and which has some really annoying and problematic dependencies and Mac bugs.
+
+The preferred way to do this in the Lyrasis Data Migrations team environment is outlined below.
+
+Install go via https://mise.jdx.dev[mise] if you do not already have go:
+
+    mise use -g go@1.25.11 # or later version
+
+Install chromium.
+
+This is becoming more problematic, as the brew version doesn't work, and conflicts with ARM architecture exist. As of June 2026, https://github.com/ungoogled-software/ungoogled-chromium-macos[Ungoogled Chromium for the MacOS] works:
+
+    brew install --cask ungoogled-chromium
+
+Install mermaid-cli:
+
+    go install github.com/coolamit/mermaid-cli/cmd/mmd-cli@latest
+
+Alternate installation paths are documented at the mmd-cli GitHub repository.
+
+If you ever want to uninstall mmd-cli, do `which mmd-cli` and then delete the directory at that path.
+
+[#datamappingconcepts]
+== Data mappings concepts used by visualizer
+
+[#config]
+== Configuration
