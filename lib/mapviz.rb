@@ -2,7 +2,6 @@
 
 require "active_support/core_ext/object"
 require "dry-configurable"
-require "roo"
 
 module Mapviz
   module_function
@@ -10,6 +9,9 @@ module Mapviz
   def loader
     @loader ||= setup_loader
   end
+
+  # @return [Array<Hash>]
+  def worksheet = @worksheet ||= Mapviz::Worksheet.new
 
   def setup_loader
     @loader = Zeitwerk::Loader.new
