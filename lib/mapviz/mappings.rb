@@ -12,5 +12,25 @@ module Mapviz
         .map { |row| Mapviz::Mapping.new(row) }
       __setobj__(@all)
     end
+
+    # @param omitted [Boolean] if true, do not include omitted mappings
+    # @param unmapped [Boolean] if true, do not include unmapped mappings
+    # @return [Array<Mapviz::Mapping>]
+    def filter(omitted: true, unmapped: true)
+      drop = []
+      drop << omitted_mappings if omitted
+      drop << unmapped_mappings if unmapped
+      all - drop.flatten.uniq
+    end
+
+    private
+
+    def omitted_mappings = @omitted ||= all.select do |m|
+      Mapviz::Logic.is_omitted.call(m)
+    end
+
+    def unmapped_mappings = @unmapped ||= all.select do |m|
+      Mapviz::Logic.is_unmapped.call(m)
+    end
   end
 end
