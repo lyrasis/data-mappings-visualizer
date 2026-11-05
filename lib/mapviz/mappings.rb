@@ -23,6 +23,17 @@ module Mapviz
       all - drop.flatten.uniq
     end
 
+    # @param source [#match] value against which to map the original source
+    #   field of each mapping
+    # @param omitted [Boolean] if true, do not include omitted mappings
+    # @param unmapped [Boolean] if true, do not include unmapped mappings
+    # @return [Array<Mapviz::Mapping>]
+    def for_source(source:, omitted: true, unmapped: true)
+      filter(omitted: omitted, unmapped: unmapped).select do |mapping|
+        Mapviz::Values.orig_source.call(mapping).match?(source)
+      end
+    end
+
     private
 
     def omitted_mappings = @omitted ||= all.select do |m|

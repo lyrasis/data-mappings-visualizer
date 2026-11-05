@@ -13,7 +13,7 @@ RSpec.describe "Mapviz::Mappings" do
   describe "#filter" do
     let(:result) { mappings.filter(**args) }
 
-    context "rejecting omitted" do
+    context "when rejecting omitted" do
       let(:args) { {omitted: true, unmapped: false} }
 
       it "returns expected mappings" do
@@ -21,7 +21,7 @@ RSpec.describe "Mapviz::Mappings" do
       end
     end
 
-    context "rejecting unmapped" do
+    context "when rejecting unmapped" do
       let(:args) { {omitted: false, unmapped: true} }
 
       it "returns expected mappings" do
@@ -29,11 +29,35 @@ RSpec.describe "Mapviz::Mappings" do
       end
     end
 
-    context "rejecting omitted and unmapped" do
+    context "when rejecting omitted and unmapped" do
       let(:args) { {omitted: true, unmapped: true} }
 
       it "returns expected mappings" do
         expect(result.length).to eq(193)
+      end
+    end
+  end
+
+  describe "for_source" do
+    let(:result) { mappings.for_source(**args) }
+
+    context "with CONDITION ASSESSMENT, no omitted or unmapped" do
+      let(:args) do
+        {source: "CONDITION ASSESSMENT", omitted: true, unmapped: true}
+      end
+
+      it "returns expected mappings" do
+        expect(result.length).to eq(7)
+      end
+    end
+
+    context "with /^create/i, no omitted or unmapped" do
+      let(:args) do
+        {source: /^create/i, omitted: true, unmapped: true}
+      end
+
+      it "returns expected mappings" do
+        expect(result.length).to eq(11)
       end
     end
   end
