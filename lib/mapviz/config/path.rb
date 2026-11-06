@@ -37,6 +37,17 @@ module Mapviz
         File.join(project_dir, "mappings", "mermaid")
       end
 
+    # @return [String] path where {Mapviz::MermaidWriter} will write an .mmd
+    #   file if no explicit path is passed when calling that class
+    setting :default_mmd_file,
+      reader: true,
+      default: nil,
+      constructor: ->(default) do
+        return default if default
+
+        File.join(mermaid_dir, "mappings.mmd")
+      end
+
     # @return [String] path to directory where output PDF files should be
     #   written
     setting :pdf_dir,
@@ -46,6 +57,20 @@ module Mapviz
         return default if default
 
         File.join(project_dir, "mappings", "graphs")
+      end
+
+    # @return [String] path to mermaid config file
+    # @note This is needed to bump up maxTextSize if you receive the "Maximum
+    #   text size in diagram exceeded" error when rendering. It has to be in
+    #   this file that we pass along to the renderer, as it does not appear to
+    #   work with included in diagram frontmatter.
+    setting :mermaid_render_config_file,
+      reader: true,
+      default: nil,
+      constructor: ->(default) do
+        return default if default
+
+        File.join(Bundler.root, "mmd_config.json")
       end
   end
 end

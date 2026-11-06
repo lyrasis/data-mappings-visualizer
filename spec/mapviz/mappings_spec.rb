@@ -61,4 +61,32 @@ RSpec.describe "Mapviz::Mappings" do
       end
     end
   end
+
+  describe "for_target" do
+    let(:result) { mappings.for_target(**args) }
+
+    context "with conditioncheck, no omitted or unmapped" do
+      let(:args) do
+        {target: "group.title", omitted: true, unmapped: true}
+      end
+
+      it "returns expected mappings" do
+        expect(result.length).to eq(1)
+
+        expect(
+          Mapviz::Values.source.call(result.first)
+        ).to eq("GLMA INVENTORY 2024")
+      end
+    end
+
+    context "with location.termdisplayname, no omitted or unmapped" do
+      let(:args) do
+        {target: "location.termdisplayname", omitted: true, unmapped: true}
+      end
+
+      it "returns expected mappings" do
+        expect(result.length).to eq(7)
+      end
+    end
+  end
 end

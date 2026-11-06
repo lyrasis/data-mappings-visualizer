@@ -2,21 +2,49 @@
 
 require "thor"
 
-class Mappings < Thor
-  desc "graph", "Render and save flowchart of mappings"
+class Mappings < Mapviz::CommandOpts
+  desc "graph", "Render and open flowchart of all mappings"
+  shared_options(:exclude_omitted, :exclude_unmapped)
   def graph
     check_for_mmdcli
-    mermaid = get_mermaid
 
-    mmd_dir = dir || Sr.data_dir
-    FileUtils.mkdir_p(mmd_dir) unless Dir.exist?(mmd_dir)
+    mappings = Mapviz::Mappings.new.filter(
+      omitted: options[:exclude_omitted],
+      unmapped: options[:exclude_unmapped]
+    )
+    path = create("mappings", mappings)
+    `open #{path}`
+    exit(0)
+  end
 
-    mmd_path = File.join(mmd_dir, "mappings.mmd")
-    File.open(mmd_path, "w") { |f| f << mermaid }
+  desc "graphs", "Render and save flowcharts of all individual to/from mappings"
+  shared_options(:exclude_omitted, :exclude_unmapped)
+  def graphs
+    check_for_mmdcli
 
-    pdf_path = File.join(mmd_dir, "mappings.pdf")
+    all_mappings = Mapviz::Mappings.new
 
-    create(mmd_path, pdf_path)
+    Mapviz.orig_sources.each do |field|
+      mappings = all_mappings.for_source(
+        source: field,
+        exclude_omitted: options[:exclude_omitted],
+        exclude_unmapped: options[:exclude_unmapped]
+      )
+
+      create("from_#{filesafe(field)}", mappings)
+    end
+
+    Mapviz.targets.each do |field|
+      mappings = all_mappings.for_target(
+        target: field,
+        exclude_omitted: options[:exclude_omitted],
+        exclude_unmapped: options[:exclude_unmapped]
+      )
+
+      name = target_for_file(mappings)
+      create("to_#{filesafe(name)}", mappings)
+    end
+    exit(0)
   end
 
   desc "from", "Render flowchart of mappings from a single source field"
@@ -25,21 +53,19 @@ class Mappings < Thor
     aliases: "-s",
     type: :string,
     desc: "The source field to output mappings for"
+  shared_options(:exclude_omitted, :exclude_unmapped)
   def from
     check_for_mmdcli
-    mermaid = get_mermaid(source: options[:sourcefield])
 
-    mmd_dir = dir || Sr.data_dir
-    FileUtils.mkdir_p(mmd_dir) unless Dir.exist?(mmd_dir)
+    mappings = Mapviz::Mappings.new.for_source(
+      source: options[:sourcefield],
+      exclude_omitted: options[:exclude_omitted],
+      exclude_unmapped: options[:exclude_unmapped]
+    )
 
-    name = "mappings_from_#{options[:sourcefield]}".tr(" ", "_")
-
-    mmd_path = File.join(mmd_dir, "#{name}.mmd")
-    File.open(mmd_path, "w") { |f| f << mermaid }
-
-    pdf_path = File.join(mmd_dir, "#{name}.pdf")
-
-    create(mmd_path, pdf_path)
+    path = create(options[:sourcefield], mappings)
+    `open #{path}`
+    exit(0)
   end
 
   desc "to", "Render flowchart of mappings to target field"
@@ -50,19 +76,14 @@ class Mappings < Thor
     desc: "Target fields for which to output mappings"
   def to
     check_for_mmdcli
-    mermaid = get_mermaid(target: options[:targetfield])
 
-    mmd_dir = dir || Sr.data_dir
-    FileUtils.mkdir_p(mmd_dir) unless Dir.exist?(mmd_dir)
+    mappings = Mapviz::Mappings.new
+      .for_target(target: options[:targetfield])
 
-    name = "mappings_to_#{options[:targetfield]}".tr(" ", "_")
-
-    mmd_path = File.join(mmd_dir, "#{name}.mmd")
-    File.open(mmd_path, "w") { |f| f << mermaid }
-
-    pdf_path = File.join(mmd_dir, "#{name}.pdf")
-
-    create(mmd_path, pdf_path)
+    name = target_for_file(mappings)
+    path = create("to_#{filesafe(name)}", mappings)
+    `open #{path}`
+    exit(0)
   end
 
   no_commands do
@@ -91,23 +112,28 @@ class Mappings < Thor
       dir
     end
 
-    def get_mermaid(source: nil, target: nil)
-      return Sr::DrawMappings.new(source: source).mermaid if source
-      return Sr::DrawMappings.new(target: target).mermaid if target
-
-      Sr::DrawMappings.new.mermaid
+    def target_for_file(mappings)
+      final = mappings.find { |m| Mapviz::Logic.is_final_target.call(m) }
+      Mapviz::Labels.final_target_node.call(final)
+        .sub("\n", "_")
     end
 
-    def create(mmd_path, pdf_path)
-      configpath = Kiba::Extend::ProjectConfig.mermaid_config_path
+    def filesafe(str) = str.tr(" ", "_").gsub(/\W/, "")
+
+    def create(name, mappings)
+      path = File.join(Mapviz::Path.mermaid_dir, "#{name}.mmd")
+      Mapviz::MermaidWriter.new(mappings: mappings, path: path).call
+
+      pdf_path = File.join(Mapviz::Path.pdf_dir, "#{name}.pdf")
+      configpath = Mapviz::Path.mermaid_render_config_file
+
       if configpath
-        `mmd-cli -i #{mmd_path} -o #{pdf_path} -f -c #{configpath}`
+        `mmd-cli -i #{path} -o #{pdf_path} -f -c #{configpath}`
       else
-        `mmd-cli -i #{mmd_path} -o #{pdf_path} -f`
+        `mmd-cli -i #{path} -o #{pdf_path} -f`
       end
 
-      `open #{pdf_path}`
-      exit(0)
+      pdf_path
     end
   end
 end
