@@ -9,7 +9,7 @@ module Mapviz
       @all = Roo::Excelx.new(Mapviz::Path.mappings_file)
         .sheet(Mapviz::Xlsx.worksheet)
         .parse(headers: true)
-        .map { |row| row.transform_keys(&:to_sym) }
+        .map { |row| row.transform_keys { |k| k.gsub(/\W/, "_").to_sym } }
     end
 
     # @return [Array<Symbol>]
