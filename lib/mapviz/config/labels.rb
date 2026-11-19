@@ -21,7 +21,12 @@ module Mapviz
     # @return [String] used as label of source nodes
     setting :source_node,
       reader: true,
-      default: ->(mapping) { Mapviz::Values.source.call(mapping) }
+      default: ->(mapping) do
+        base = Mapviz::Values.source.call(mapping)
+        dbtab = "DB TAB: #{mapping.DB_TAB}"
+        dbsrc = "ON SCREEN IN DB: #{mapping.ON_SCREEN_IN_DB}"
+        "#{base}\n#{dbtab} / #{dbsrc}"
+      end
 
     setting :intermediate_target_node,
       reader: true,
@@ -32,9 +37,13 @@ module Mapviz
     setting :final_target_node,
       reader: true,
       default: ->(mapping) do
+        path = [
+          Mapviz::Values.target_field_user.call(mapping),
+          Mapviz::Values.target_field_machine.call(mapping)
+        ].reject(&:blank?).join(" > ")
         [
           Mapviz::Values.target_record.call(mapping)&.upcase,
-          Mapviz::Values.target_field_user.call(mapping)
+          path
         ].compact.join("\n")
       end
   end

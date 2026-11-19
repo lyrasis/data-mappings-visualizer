@@ -19,43 +19,33 @@ module Mapviz
 
     setting :source_type,
       reader: true,
-      default: ->(mapping) { mapping.send(Mapviz::Headers.source_type) }
+      default: ->(_mapping) { "orig" }
 
     setting :included,
       reader: true,
-      default: ->(mapping) { mapping.send(Mapviz::Headers.included) }
+      default: ->(_mapping) { "y" }
 
     setting :omission_reason,
       reader: true,
-      default: ->(mapping) do
-        val = mapping.send(Mapviz::Headers.omission_reason)
-        return if val.blank? || val == "."
-
-        val
-      end
+      default: ->(_mapping) { "" }
 
     setting :orig_source,
       reader: true,
-      default: ->(mapping) { mapping.send(Mapviz::Headers.orig_source) }
+      default: ->(mapping) { mapping.send(Mapviz::Headers.source) }
 
     setting :constraint,
       reader: true,
-      default: ->(mapping) do
-        val = mapping.send(Mapviz::Headers.constraint)
-        return if val.blank? || val == "."
-
-        val
-      end
+      default: ->(mapping) { "" }
 
     setting :detail,
       reader: true,
       default: ->(mapping) do
         [
-          mapping.send(Mapviz::Headers.detail),
-          mapping.send(Mapviz::Headers.omission_reason)
+          mapping.send(Mapviz::Headers.constraint),
+          mapping.send(Mapviz::Headers.detail)
         ].reject do |val|
           val.blank? || val == "." || val == "na"
-        end.first
+        end.join("\n")
       end
 
     setting :target_record,

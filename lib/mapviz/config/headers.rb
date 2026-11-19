@@ -17,28 +17,28 @@ module Mapviz
     #   intermediate fields created by other mappings
     setting :source,
       reader: true,
-      default: :sourceField,
+      default: "source_key",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing type of source field; generally this
     #   will indicate whether {source} is original or derived
     setting :source_type,
       reader: true,
-      default: :source,
+      default: "NA",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing indication of whether or not {source}
     #   is included in the migration project
     setting :included,
       reader: true,
-      default: :migrating,
+      default: "NA",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing indication why source field is not
     #   included in the migration
     setting :omission_reason,
       reader: true,
-      default: :omissionReason,
+      default: "NA",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing the ORIGINAL source field
@@ -50,7 +50,7 @@ module Mapviz
     #  "|" (pipe character, typed as shift-\)
     setting :orig_source,
       reader: true,
-      default: :origsourcefield,
+      default: "source_key",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing (hopefully brief) description of logic,
@@ -58,7 +58,7 @@ module Mapviz
     #   transformation represented by the row will apply to
     setting :constraint,
       reader: true,
-      default: :conditions,
+      default: "MAPPING TYPE",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] column heading for field containing details of the
@@ -68,7 +68,7 @@ module Mapviz
     #   extraction/transformation processes
     setting :detail,
       reader: true,
-      default: :mappingNote,
+      default: "OS COMMENTS / QUESTIONS",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing target record type, e.g. the record
@@ -79,7 +79,7 @@ module Mapviz
     #   actual target record type
     setting :target_record,
       reader: true,
-      default: :targetRecord,
+      default: "ASPACE RECORD TYPE",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing target field names, e.g. the fields we
@@ -95,7 +95,7 @@ module Mapviz
     #   {target_field_user} to the column where you record the target field.
     setting :target_field_machine,
       reader: true,
-      default: :targetField,
+      default: "ASPACE MAPPING",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] Column containing user-friendly version of
@@ -109,7 +109,7 @@ module Mapviz
     #   {target_field_user} to the column where you record the target field.
     setting :target_field_user,
       reader: true,
-      default: :UILabel,
+      default: "ASPACE SECTION",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] column heading for field containing combined record type/
@@ -119,7 +119,7 @@ module Mapviz
     #   concatenated field you use to do that lookup
     setting :target_id,
       reader: true,
-      default: :target_id,
+      default: "target_key",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     # @return [Symbol] column heading for field containing status of the
@@ -127,7 +127,7 @@ module Mapviz
     #   `loaded`, `approved`
     setting :status,
       reader: true,
-      default: :status,
+      default: "APPROVAL",
       constructor: ->(default) { Mapviz::Headers.format_header(default) }
 
     def format_header(val)

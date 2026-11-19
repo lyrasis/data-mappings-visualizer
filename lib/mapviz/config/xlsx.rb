@@ -11,6 +11,6 @@ module Mapviz
     #   recorded
     setting :worksheet,
       reader: true,
-      default: "mappings"
+      default: "accessions"
   end
 end

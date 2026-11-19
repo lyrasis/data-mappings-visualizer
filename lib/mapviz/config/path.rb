@@ -13,7 +13,7 @@ module Mapviz
     setting :project_dir,
       reader: true,
       default: File.expand_path(
-        File.join("~", "data", "scottishrite", "mig")
+        File.join("~", "data", "nlb")
       )
 
     # @return [String] path to .xlsx file containing your mappings
@@ -23,7 +23,7 @@ module Mapviz
       constructor: ->(default) do
         return default if default
 
-        File.join(project_dir, "Scottish Rite Mappings.xlsx")
+        File.join(project_dir, "NLB_Database_Mappings.xlsx")
       end
 
     # @return [String] path to directory where output Mermaid .mmd files should

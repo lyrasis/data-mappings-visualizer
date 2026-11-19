@@ -20,14 +20,22 @@ module Mapviz
     #   determined or implemented.
     setting :is_migrating,
       reader: true,
-      default: ->(mapping) { Mapviz::Values.included.call(mapping) == "y" }
+      default: ->(mapping) do
+        !Mapviz::Values.target_record.call(mapping).match?(
+          /^ *(?:NA|N\/A|Do not migrate) *$/
+        )
+      end
 
     # @return [true] if row represents a mapping that will not be
     #   implemented in the migration
     # @return [nil, false] otherwise
     setting :is_omitted,
       reader: true,
-      default: ->(mapping) { Mapviz::Values.included.call(mapping) == "n" }
+      default: ->(mapping) do
+        Mapviz::Values.target_record.call(mapping).match?(
+          /^ *(?:NA|N\/A|Do not migrate) *$/
+        )
+      end
 
     # @return [true] if row represents a mapping for a source field that has not
     #   yet been recorded: inclusion/omission isn't recorded, or if recorded,
@@ -49,37 +57,28 @@ module Mapviz
     # @return [nil, false] otherwise
     setting :is_orig,
       reader: true,
-      default: ->(mapping) do
-        Mapviz::Values.source_type.call(mapping) == "0 - Mimsy export"
-      end
+      default: ->(_mapping) { true }
 
     # @return [true] if row represents a mapping from a derived,
     #   intermediate field
     # @return [nil, false] otherwise
     setting :is_intermediate_source,
       reader: true,
-      default: ->(mapping) do
-        Mapviz::Values.source_type.call(mapping)&.start_with?("1 - migration")
-      end
+      default: ->(_mapping) { false }
 
     # @return [true] if row represents a mapping to a derived,
     #   intermediate field
     # @return [nil, false] otherwise
     setting :is_intermediate_target,
       reader: true,
-      default: ->(mapping) do
-        Mapviz::Values.target_record.call(mapping) ==
-          "intermediate derived field"
-      end
+      default: ->(_mapping) { false }
 
     # @return [true] if row represents a mapping to a final field in the
     #   target system
     # @return [nil, false] otherwise
     setting :is_final_target,
       reader: true,
-      default: ->(mapping) do
-        !Mapviz::Values.target_field_user.call(mapping).blank?
-      end
+      default: ->(_mapping) { true }
 
     # @return [true] if row represents a mapping whose status indicates the
     #   mapped data is loaded into the target system
@@ -90,7 +89,7 @@ module Mapviz
       reader: true,
       default: ->(mapping) do
         Mapviz::Logic.is_final_target.call(mapping) &&
-          Mapviz::Values.status.call(mapping) == "loaded"
+          Mapviz::Values.status.call(mapping) == "APPROVE"
       end
   end
 end
