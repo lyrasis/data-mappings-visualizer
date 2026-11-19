@@ -38,7 +38,8 @@ module Mapviz
       end
 
     # @return [String] path where {Mapviz::MermaidWriter} will write an .mmd
-    #   file if no explicit path is passed when calling that class
+    #   file if no explicit path is passed when calling that class. The .mmd
+    #   syntax file is output and then the PDF is generated from it.
     setting :default_mmd_file,
       reader: true,
       default: nil,

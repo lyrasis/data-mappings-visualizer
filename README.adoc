@@ -20,13 +20,22 @@ toc::[]
 == Assumptions
 
 * You have installed <<mermaidcli>>
-* Your data mappings are in a Microsoft Excel worksheet located on your local machine (not in a synced OneDrive directory)
+* Your data mappings are in a single tab (sheet) of a Microsoft Excel workbook (.xlsx) located on your local machine{empty}footnote:[Given that we typically create and share mappings spreadsheets with clients via Sharepoint, this means downloading a copy of that shared workbook in order to generate mappings. I just haven't had the time and mental fortitude to tangle with any Microsoft APIs for programmatically accessing files in SharePoint.]
 * Your data mappings spreadsheet expresses the <<datamappingconcepts>> in consistent ways that can be expressed in Ruby code snippets to configure this tool
-* You have created the required <<config>> for the mappings you want to visualize
+
 
 == Set up
 
+Initially, anyway:
 
+* Ensure Ruby 4.0.5 is installed
+* Meet <<dependencies>>.
+Note: if you have already set up mermaid-cli to generate job dependency graphs in kiba-extend, you already have this set up.
+* Clone this repo
+* `cd` into it
+* `bundle install`
+* Make a local branch of this repo for the project/mappings spreadsheet from which you wish to generate mappings
+* Edit configuration settings in the project branch as described in <<config>>
 
 [#dependencies]
 == Non-Ruby/non-bundleable dependencies
@@ -64,5 +73,62 @@ If you ever want to uninstall mmd-cli, do `which mmd-cli` and then delete the di
 [#datamappingconcepts]
 == Data mappings concepts used by visualizer
 
+* Works on a single tab of an .xlsx workbook.
+If you split your mappings across multiple tabs, you'll need to switch the `Mapviz::Xlsx.worksheet` value to generate diagrams for different tabs/worksheets.
+* Each row contains one mapping
+* A mapping is defined as an indication of the treatment of all or some (filtered or constrained) data from a source (original or intermediate) field.
+This may include an indication that the said data is being dropped from the migration process, OR that it is moving to a target (intermediate or final) field, with or without transformation of the data before it is recorded in the target field.
+
+At the most simple, a mappings sheet must express:
+
+* original source data field
+* final target data field
+
+With a very simple two-column mapping like this, <<config>> can be tweaked to work, but with mappings this simple, you probably don't need flowcharts of your mappings.
+
+Currently the diagrams this application creates supports expression of:
+
+* original source data fields
+* final target data fields
+** the fact that we probably need these to display the record type and the field
+** and that we may wish to display a "UI Label" from the target system for these, rather than the machine names o f the record types/fields
+* intermediate fields generated in the process of the migration, which can be sources and/or targets
+* constraints on source field values (e.g. if = "Y", if a numeric value) that the rest of the mapping applies to
+* detail -- often a supplied value or a transformation applied.
+* omitted mappings - source fields (original or intermediate) being dropped from migration.
+Omission reason values for omitted mappings are treated as details.
+By default, the command to generate diagrams do not include omitted mappings.
+* unmapped mappings - By default, the command to generate diagrams do not include unmapped mappings.
+* status of an included mapping: most importantly, you can distinguish final target fields where the data has been loaded/is ready for client review from those which are just planned.
+
+Currently, if your mappings include intermediate fields, in order to accurately produce a diagram of all mappings from a given field, or to a given field, each mapping row needs to include a field that captures the original source data field(s) for the mapping expressed in the row.
+
+
 [#config]
 == Configuration
+
+This section describes the configuration files containing settings you might update.
+
+These are roughly ordered from most likely you'll need to edit them to least.
+
+path.rb:: The location of the mappings .xlsx file, output folders, and Mermaid renderer config file.
+xlsx.rb:: If the worksheet/tab containing your mappings is not `mappings`, change the value here.
+headers.rb:: This is where you define which columns of your mappings contain different <<datamappingconcepts>>.
+logic.rb:: This is where you define logic for determining the meaning/state of a value.
+For example, you will have set the `Mapviz::Headers.included` setting to the column in which you indicate whether a source field gets included in a migration.
+The logic in `Mapviz::Values.included` is used to retrieve the value from that column for a particular row.
+The logic in `Mapviz::Logic.is_migrating` and `Mapviz::Logic.is_omitted` is how the application determines the category of this mapping from the retrieved value.
+Do you indicate this with a simple "y" or "n"?
+Or do you write out "yes" and "no"?
+What does it mean if there's no value in your `Mapviz::Headers.included` column?
+Do you indicate migration inclusion in a non-binary fashion? (such as "y", "n", "used to create linkages")
+These complications and how the application should interpret them are handled in the `Mapviz::Logic` settings.
+values.rb:: The logic for pulling a value from each `header`.
+This seems like it should be obvious: just return what's in the given column.
+However, doing it this way gives you a little more control.
+For example, my convention is to fill in blank cells with `.` so I can Ctrl-arrow key navigate around more quickly.
+So I have a number of these set to return `nil` if the value of the column is `nil`, `""`, or `"."`.
+If your mappings conventions requires values from more than one column to determine if a mapping is included in the migration, you could also handle something like that here: instead of returning the value of a single column, you could combine or conditionally return the desired value.
+labels.rb:: Controls the labels on some types of nodes in a diagram.
+style.rb:: Control the style (node shape, edge thickness, colors, emoji icon prefixes) for different node/edge categories.
+mermaid.rb:: Control values that can be set in Mermaid flowchart frontmatter.
