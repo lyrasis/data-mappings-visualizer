@@ -19,10 +19,10 @@ module Mapviz
     attr_reader :mapping
 
     def source
-      field = Mapviz::Values.source.call(mapping)
-      return if field.blank?
+      label = Mapviz::Labels.source_node.call(mapping)
+      return if label.blank?
 
-      Mapviz::Node.new(id: source_id, label: field, type: source_type)
+      Mapviz::Node.new(id: source_id, label: label, type: source_type)
     end
 
     def constraint

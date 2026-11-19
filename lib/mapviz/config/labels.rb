@@ -18,6 +18,11 @@ module Mapviz
       reader: true,
       default: ->(_mapping) { "Not yet mapped" }
 
+    # @return [String] used as label of source nodes
+    setting :source_node,
+      reader: true,
+      default: ->(mapping) { Mapviz::Values.source.call(mapping) }
+
     setting :intermediate_target_node,
       reader: true,
       default: ->(mapping) do
