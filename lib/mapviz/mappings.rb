@@ -37,7 +37,7 @@ module Mapviz
         val = Mapviz::Values.orig_source.call(mapping)
         next if val.blank?
 
-        val.split("|").any? { |v| v.match?(source) }
+        val.split("|").any? { |v| v == source || v.match?(source) }
       end
     end
 
@@ -53,7 +53,8 @@ module Mapviz
         unmapped: exclude_unmapped
       )
       base = filtered.select do |mapping|
-        Mapviz::Values.target_id.call(mapping).match?(target)
+        id = Mapviz::Values.target_id.call(mapping)
+        id == target || id.match?(target)
       end
 
       compile_ancestors(base, filtered)
