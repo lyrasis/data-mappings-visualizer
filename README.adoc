@@ -91,7 +91,7 @@ Currently the diagrams this application creates supports expression of:
 * original source data fields
 * final target data fields
 ** the fact that we probably need these to display the record type and the field
-** and that we may wish to display a "UI Label" from the target system for these, rather than the machine names o f the record types/fields
+** and that we may wish to display a "UI Label" from the target system for these, rather than the machine names of the record types/fields
 * intermediate fields generated in the process of the migration, which can be sources and/or targets
 * constraints on source field values (e.g. if = "Y", if a numeric value) that the rest of the mapping applies to
 * detail -- often a supplied value or a transformation applied.
