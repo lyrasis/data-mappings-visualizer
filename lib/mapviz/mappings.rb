@@ -60,7 +60,6 @@ module Mapviz
       compile_ancestors(base, filtered)
     end
 
-    private
 
     def omitted_mappings = @omitted ||= all.select do |m|
       Mapviz::Logic.is_omitted.call(m)
@@ -69,6 +68,8 @@ module Mapviz
     def unmapped_mappings = @unmapped ||= all.select do |m|
       Mapviz::Logic.is_unmapped.call(m)
     end
+
+    private
 
     def compile_ancestors(base, filtered)
       base.map { |mapping| ancestors(mapping, filtered) }

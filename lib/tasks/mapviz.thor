@@ -47,6 +47,17 @@ class Mappings < Mapviz::CommandOpts
     exit(0)
   end
 
+  desc "omitted", "Render flowchart of omitted mappings"
+  def omitted
+    check_for_mmdcli
+
+    mappings = Mapviz::Mappings.new.omitted_mappings
+
+    path = create("omitted", mappings)
+    `open #{path}`
+    exit(0)
+  end
+
   desc "from", "Render flowchart of mappings from a single source field"
   method_option :sourcefield,
     required: true,
